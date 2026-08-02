@@ -20,14 +20,14 @@ if ! readelf -h "$file_name" &>/dev/null; then
     exit 1
 fi
 
-# 4. readelf vasitəsilə lazımi məlumatları çıxarırıq
-magic_number=$(readelf -h "$file_name" | grep "Magic:" | sed 's/^[[:space:]]*Magic:[[:space:]]*//')
-class=$(readelf -h "$file_name" | grep "Class:" | sed 's/^[[:space:]]*Class:[[:space:]]*//')
+# 4. readelf vasitəsilə lazımi məlumatları çıxarırıq və xargs ilə təmizləyirik
+magic_number=$(readelf -h "$file_name" | grep "Magic:" | sed 's/^[[:space:]]*Magic:[[:space:]]*//' | xargs)
+class=$(readelf -h "$file_name" | grep "Class:" | sed 's/^[[:space:]]*Class:[[:space:]]*//' | xargs)
 
-# DÜZƏLİŞ BURADADIR: Vergüldən sonrakı hissəni ("little endian") götürmək üçün awk əlavə etdik
-byte_order=$(readelf -h "$file_name" | grep "Data:" | awk -F', ' '{print $2}')
+# Byte Order üçün yalnız vergüldən sonrakı hissəni götürürük və boşluqları silirik
+byte_order=$(readelf -h "$file_name" | grep "Data:" | awk -F', ' '{print $2}' | xargs)
 
-entry_point_address=$(readelf -h "$file_name" | grep "Entry point address:" | sed 's/^[[:space:]]*Entry point address:[[:space:]]*//')
+entry_point_address=$(readelf -h "$file_name" | grep "Entry point address:" | sed 's/^[[:space:]]*Entry point address:[[:space:]]*//' | xargs)
 
 # 5. messages.sh faylını skriptə daxil edirik və funksiyanı çağırırıq
 if [ -f "./messages.sh" ]; then
